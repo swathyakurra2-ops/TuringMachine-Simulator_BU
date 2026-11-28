@@ -1,6 +1,7 @@
 def parse_string(s, par='{}', sep=',', ret=set):
     s = s.strip(par[0]).strip(par[1])
-    return ret(s.split(sep))
+    parts = [item.strip() for item in s.split(sep)]
+    return ret(parts)
 
 
 def parse_text(lines):
@@ -18,11 +19,34 @@ def parse_text(lines):
     return num_tapes, alphabet, states, transitions
 
 
+
 def get_delta_dict(transitions, alphabet):
-    transitions_list = [t.replace('*', s) for s in alphabet
-                        for t in transitions if '*' in t]
-    transitions_list.extend([t for t in transitions if '*' not in t])
-    delta_dict = {parse_string(string.split('-->')[0], par='()', ret=tuple):
-                  parse_string(string.split('-->')[1], par='()', ret=tuple)
-                  for string in transitions_list}
+    transitions_list = [
+        t.replace('*', s)
+        for s in alphabet
+        for t in transitions if '*' in t
+    ]
+
+    transitions_list.extend([
+        t for t in transitions if '*' not in t
+    ])
+
+    delta_dict = {}
+
+    for string in transitions_list:
+        left, right = string.split('-->', 1)
+
+        key = tuple(
+            item.strip()
+            for item in left.strip().strip('()').split(',')
+        )
+
+        value = tuple(
+            item.strip()
+            for item in right.strip().strip('()').split(',')
+        )
+
+        delta_dict[key] = value
+
     return delta_dict
+
